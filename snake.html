@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Snake</title>
+    <link rel="icon" href="https://cdn.discordapp.com/attachments/818713370194477056/828346352320118825/Capture.PNG">
+    
+</head>
+<body style="background-color: rgb(63, 63, 63);">
+
+    <canvas height="600px" width="600px" id="mycanvas" style="background-color: lightgreen;"></canvas>
+
+    <h1 style="font-family: cursive; color: antiquewhite;" id="score"></h1>
+    <h1 style="font-family: cursive; color: antiquewhite;" id="hscore"></h1>
+
+<script>
+
+
+const canv = document.getElementById('mycanvas')
+const ctx = canv.getContext('2d')
+const fps = 15 // Edit this to change game fps
+
+let lastframe = 0
+function loop(currentTime) { 
+    window.requestAnimationFrame(loop)
+    let frameTime = ((currentTime) - lastframe) / 1000
+    if (frameTime < 1/fps) {return}
+    lastframe = currentTime
+
+    ctx.clearRect(0, 0, canv.height, canv.width) //Clears the canvas each frame
+    
+    playerStatus.playerFrame()
+    food.foodFrame()
+
+    document.getElementById("score").innerHTML = 'score: ' + playerStatus.length //Writes the player's score
+
+    if(playerStatus.length > playerStatus.highscore) {playerStatus.highscore = playerStatus.length}
+    document.getElementById("hscore").innerHTML = 'high score: ' + playerStatus.highscore //Stores the player's high score
+
+    //Put all functions that run on each frame here
+}
+
+let moved // This variable prevents the player from moving twice on the same frame 
+
+window.onkeydown = function input(key) { // detects if keys are pressed
+    if ((key.keyCode == "37" || key.keyCode == "65") && playerStatus.xv == 0 && moved == false) {playerStatus.xv =-1; playerStatus.yv = 0; moved = true} 
+    if ((key.keyCode == "38" || key.keyCode == "87") && playerStatus.yv == 0 && moved == false) {playerStatus.yv =-1; playerStatus.xv = 0; moved = true}
+    if ((key.keyCode == "39" || key.keyCode == "68") && playerStatus.xv == 0 && moved == false) {playerStatus.xv = 1; playerStatus.yv = 0; moved = true}
+    if ((key.keyCode == "40" || key.keyCode == "83") && playerStatus.yv == 0 && moved == false) {playerStatus.yv = 1; playerStatus.xv = 0; moved = true}
+    //Find keycodes for other keys at https://keycode.info/
+}
+
+
+let playerStatus = { //Stores the player's status
+    xpos:300,
+    ypos:300,
+    xv:0,
+    yv:0,
+    length:1,
+    tailx:[],
+    taily:[],
+    highscore:0,
+
+    die() {
+        this.tailx = []
+        this.taily = []
+        this.xpos = 300
+        this.ypos = 300
+        this.xv = 0
+        this.yv = 0
+        this.length = 1
+
+
+        food.xpos = 560
+        food.ypos = 300
+    },
+
+    tailCollision() {
+        for(let i=0; i<this.tailx.length; i++) {
+            if (this.xpos == this.tailx[i] && this.ypos == this.taily[i]) {return true}
+         }
+         return false
+    },
+
+    movement() {
+        moved = false
+        this.tailx.pop(); this.tailx.reverse(); this.tailx.push(this.xpos); this.tailx.reverse() // Moves the tail
+        this.taily.pop(); this.taily.reverse(); this.taily.push(this.ypos); this.taily.reverse()
+
+        this.xpos += 20 * this.xv // Moves the player
+        this.ypos += 20 * this.yv
+
+        if(this.xpos > canv.width - 5 || this.ypos > canv.height - 5 || this.xpos < 0 || this.ypos < 0) { // die if offscreen 
+            this.die()
+        }
+
+        for(let i=0; i<this.tailx.length; i++) { //Draws the player's tail
+            ctx.beginPath()
+            ctx.fillStyle = 'black'
+            ctx.rect(this.tailx[i], this.taily[i], 18, 18)
+            ctx.fill()
+        }
+
+        if(this.tailCollision()) { //Die if touching tail
+            this.die()
+        }
+    },
+
+    drawSelf() { // Draws snake's head
+        ctx.beginPath()
+        ctx.fillStyle = 'white'
+        ctx.rect(this.xpos, this.ypos, 18, 18)
+        ctx.fill()
+    },
+
+    playerFrame() {
+        this.movement()
+        this.drawSelf()
+    }
+}
+
+
+let food = {
+    xpos:400,
+    ypos:300,
+
+    drawSelf() {
+        ctx.beginPath()
+        ctx.rect(this.xpos, this.ypos, 20, 20)
+        ctx.fillStyle = 'red'
+        ctx.fill()
+    },
+
+    collision(){
+        if(this.xpos == playerStatus.xpos && this.ypos == playerStatus.ypos) {
+            playerStatus.length++
+            this.xpos = Math.floor(Math.random() * 20) * 20
+            this.ypos = Math.floor(Math.random() * 20) * 20
+
+            playerStatus.tailx.push(playerStatus.xpos)
+            playerStatus.taily.push(playerStatus.ypos)
+        }
+    },
+
+    foodFrame() {
+        this.collision()
+        this.drawSelf()
+    }
+}
+
+loop()
+
+
+</script>
+</body>
+</html>
