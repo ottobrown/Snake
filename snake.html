@@ -4,17 +4,40 @@
     <title>Snake</title>
     <link rel="icon" href="https://cdn.discordapp.com/attachments/818713370194477056/828346352320118825/Capture.PNG">
     
+    <style>
+        body {
+            background-color: rgb(63, 63, 63);
+        }
+
+        #mycanvas {
+            background-color: lightgreen;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+
+        #scoreDisplay {
+            font-family: cursive; 
+            color: antiquewhite;
+            float: left;
+            width: auto;
+            margin-right: 0;
+        }
+    </style>
+
 </head>
-<body style="background-color: rgb(63, 63, 63);">
+<body>
 
-    <canvas height="600px" width="600px" id="mycanvas" style="background-color: lightgreen;"></canvas>
+<div id='scoreDisplay'>
+    <h1 class="scoreDisplay" id="score"></h1>
+    <h1 class="scoreDisplay" id="hscore"></h1>
+</div>
 
-    <h1 style="font-family: cursive; color: antiquewhite;" id="score"></h1>
-    <h1 style="font-family: cursive; color: antiquewhite;" id="hscore"></h1>
+    <canvas height="600px" width="600px" id="mycanvas"></canvas>
 
 <script>
-
-
+    
 const canv = document.getElementById('mycanvas')
 const ctx = canv.getContext('2d')
 const fps = 15 // Edit this to change game fps
@@ -33,8 +56,10 @@ function loop(currentTime) {
 
     document.getElementById("score").innerHTML = 'score: ' + playerStatus.length //Writes the player's score
 
-    if(playerStatus.length > playerStatus.highscore) {playerStatus.highscore = playerStatus.length}
+    if(playerStatus.length > playerStatus.highscore) {playerStatus.highscore = playerStatus.length
+        localStorage.highscore = playerStatus.highscore}
     document.getElementById("hscore").innerHTML = 'high score: ' + playerStatus.highscore //Stores the player's high score
+
 
     //Put all functions that run on each frame here
 }
@@ -147,6 +172,9 @@ let food = {
     }
 }
 
+if(localStorage.highscore) {
+    playerStatus.highscore = localStorage.highscore
+}
 loop()
 
 
