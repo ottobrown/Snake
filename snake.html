@@ -78,14 +78,15 @@ window.onkeydown = function input(key) { // detects if keys are pressed
 let playerStatus = { //Stores the player's status
     xpos:300,
     ypos:300,
-    xv:0,
+    xv:0, //x velocity 
     yv:0,
     length:1,
+    //These arrays store all the tail's positions in x and y axis
     tailx:[],
     taily:[],
     highscore:0,
 
-    die() {
+    die() { //Resets everything if you die
         this.tailx = []
         this.taily = []
         this.xpos = 300
@@ -99,11 +100,15 @@ let playerStatus = { //Stores the player's status
         food.ypos = 300
     },
 
-    tailCollision() {
+    isTouchingTail(x, y) {
         for(let i=0; i<this.tailx.length; i++) {
-            if (this.xpos == this.tailx[i] && this.ypos == this.taily[i]) {return true}
+            if (x == this.tailx[i] && y == this.taily[i]) {return true}
          }
          return false
+    },
+
+    tailCollision() {
+        return playerStatus.isTouchingTail(this.xpos, this.ypos)
     },
 
     movement() {
@@ -155,11 +160,20 @@ let food = {
         ctx.fill()
     },
 
-    collision(){
-        if(this.xpos == playerStatus.xpos && this.ypos == playerStatus.ypos) {
+    collision() {
+        if(this.xpos == playerStatus.xpos && this.ypos == playerStatus.ypos) { //Respawns food and increased player length if eaten
             playerStatus.length++
-            this.xpos = Math.floor(Math.random() * 20) * 20
-            this.ypos = Math.floor(Math.random() * 20) * 20
+
+            let attemptx = Math.floor(Math.random() * 20) * 20
+            let attempty = Math.floor(Math.random() * 20) * 20
+
+            while(playerStatus.isTouchingTail(attemptx, attempty)) { //Prevents from spawning on snake tail
+                console.log('prevented spawn on tail')
+                attemptx = Math.floor(Math.random() * 20) * 20
+                attempty = Math.floor(Math.random() * 20) * 20
+            }
+            this.xpos = attemptx
+            this.ypos = attempty
 
             playerStatus.tailx.push(playerStatus.xpos)
             playerStatus.taily.push(playerStatus.ypos)
@@ -172,7 +186,7 @@ let food = {
     }
 }
 
-if(localStorage.highscore) {
+if(localStorage.highscore) { //Loads in highscore from localStorage
     playerStatus.highscore = localStorage.highscore
 }
 loop()
